@@ -1,4 +1,15 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
+
+class CustomUser(AbstractUser):
+    ROLE_CHOICES = (
+        ('operator', 'Operator'),
+        ('maintenance', 'Maintenance'),
+    )
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, blank=True, null=True)
+
+    def __str__(self):
+        return self.username
 
 class MaintenanceRequest(models.Model):
     # Informações do Solicitante
@@ -34,17 +45,22 @@ class MaintenanceRequest(models.Model):
     # Descrição do Problema
     problem_description = models.TextField(verbose_name="O que está ocorrendo?")
 
-    # Informações de Execução da Manutenção (preenchido pela manutenção)
-    maintenance_number = models.CharField(max_length=50, blank=True, null=True, verbose_name="Nº da Manutenção")
-    execution_date = models.DateField(blank=True, null=True, verbose_name="Data de Execução")
-    executor_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Nome do Executor")
-    start_time = models.TimeField(blank=True, null=True, verbose_name="Hora Início")
-    end_time = models.TimeField(blank=True, null=True, verbose_name="Hora Término")
-    total_time = models.CharField(max_length=50, blank=True, null=True, verbose_name="Tempo Total") # Pode ser calculado ou inserido
-    execution_description = models.TextField(blank=True, null=True, verbose_name="Descrição da Manutenção Executada")
+    # --- CAMPOS DA MANUTENÇÃO ---
+    STATUS_CHOICES = [
+        ('aberto', 'Aberto'),
+        ('em_andamento', 'Em Andamento'),
+        ('concluido', 'Concluído'),
+    ]
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='aberto', verbose_name="Status")
+    technician_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Nome do Técnico")
+    start_datetime = models.DateTimeField(blank=True, null=True, verbose_name="Início da Execução")
+    end_datetime = models.DateTimeField(blank=True, null=True, verbose_name="Fim da Execução")
+    resolution_notes = models.TextField(blank=True, null=True, verbose_name="Descrição da Manutenção Executada")
+
 
     def __str__(self):
-        return f"Requisição {self.id} - {self.requester_name}"
+        return f"Requisição {self.id} ({self.status}) - {self.requester_name}"
 
     class Meta:
         verbose_name = "Requisição de Manutenção"

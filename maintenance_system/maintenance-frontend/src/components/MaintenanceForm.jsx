@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import api from '../api.js';
 import { Button } from '@/components/ui/button.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Input } from '@/components/ui/input.jsx'
@@ -52,13 +53,11 @@ const MaintenanceForm = () => {
     setSubmitMessage('')
 
     try {
-      const response = await fetch('http://localhost:8000/api/maintenance-requests/', {
+      // Use the new API utility which handles auth headers
+      const response = await api('/api/maintenance-requests/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(formData)
-      })
+      });
 
       if (response.ok) {
         setSubmitMessage('Requisição de manutenção enviada com sucesso!')
